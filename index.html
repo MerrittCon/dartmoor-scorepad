@@ -67,13 +67,11 @@ th,td{
   font-size:18px;
 }
 
-/* Player columns */
 th:not(.label), td:not(.label){
   width:6.5ch;
   min-width:6.5ch;
 }
 
-/* Left label column */
 th.label, td.label{
   width:1%;
   white-space:nowrap;
@@ -86,7 +84,6 @@ th.label, td.label{
   z-index:3;
 }
 
-/* sticky top row */
 thead th{
   background:var(--header);
   position:sticky;
@@ -99,7 +96,6 @@ thead th.label{
   background:var(--label);
 }
 
-/* Score inputs */
 input.score{
   width:100%;
   height:100%;
@@ -111,7 +107,6 @@ input.score{
   padding:0;
 }
 
-/* Player name inputs */
 input.name{
   width:100%;
   border:none;
@@ -133,31 +128,28 @@ td.total{
   font-weight:900;
 }
 
-/* 🐑 sheep bounce animation */
+/* 🐑 sheep bounce */
 @keyframes sheepBounce{
   0%{transform:scale(1);}
   40%{transform:scale(1.25);}
   100%{transform:scale(1);}
 }
-
 .sheep-bounce{
   animation:sheepBounce 0.35s ease;
 }
 
-/* History panel */
+/* History */
 .history{
   padding:10px 14px;
   font-size:14px;
   background:#faf8f2;
   border-top:2px solid var(--stone);
 }
-
 .history table{
   border-collapse:collapse;
   width:auto;
 }
-
-.history th, .history td{
+.history th,.history td{
   border:1px solid #bbb;
   padding:4px 8px;
   height:auto;
@@ -200,8 +192,7 @@ td.total{
 </div>
 
 <script>
-const STORAGE_KEY = "dartmoor-scorepad-v1";
-
+const STORAGE_KEY = "dartmoor-scorepad-v2";
 const players = 5;
 const tbody = document.querySelector("#scoreTable tbody");
 const sheepIcon = document.getElementById("sheepIcon");
@@ -264,13 +255,18 @@ function updateTotals(){
 
   for(let p=0; p<players; p++){
     let sum = 0;
+    let playerHasValue = false;
 
     for(const inp of inputsByPlayer[p]){
-      if(inp.value !== "") anyValue = true;
+      if(inp.value !== ""){
+        anyValue = true;
+        playerHasValue = true;
+      }
       sum += numOrZero(inp.value);
     }
 
-    totalCells[p].textContent = (sum === 0 && !anyValue) ? "" : String(sum);
+    totalCells[p].textContent =
+      (!playerHasValue && sum === 0) ? "" : String(sum);
   }
 
   sheepIcon.classList.remove("sheep-bounce");
@@ -281,27 +277,36 @@ function updateTotals(){
 }
 
 /* ---------- history ---------- */
+function getPlayerNames(){
+  return [...document.querySelectorAll("input.name")]
+    .map((el,i)=> el.value.trim() || `P${i+1}`);
+}
+
 function addRound(){
   const totals = totalCells.map(td => td.textContent || "0");
-  history.push(totals);
+  history.push({ totals, names: getPlayerNames() });
   renderHistory();
   saveState();
 }
 
 function renderHistory(){
   const container = document.getElementById("historyTable");
+
   if(!history.length){
     container.innerHTML = "<em>No rounds recorded.</em>";
     return;
   }
 
   let html = "<table><tr><th>Round</th>";
-  for(let p=0;p<players;p++) html += `<th>P${p+1}</th>`;
+
+  // use names from first round for header
+  const headerNames = history[0].names;
+  headerNames.forEach(n => html += `<th>${n}</th>`);
   html += "</tr>";
 
   history.forEach((round,i)=>{
     html += `<tr><td>${i+1}</td>`;
-    round.forEach(v=> html += `<td>${v}</td>`);
+    round.totals.forEach(v => html += `<td>${v}</td>`);
     html += "</tr>";
   });
 
@@ -313,7 +318,7 @@ function renderHistory(){
 function saveState(){
   const data = {
     scores: inputsByPlayer.map(arr=>arr.map(i=>i.value)),
-    names: [...document.querySelectorAll("input.name")].map(i=>i.value),
+    names: getPlayerNames(),
     history
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
