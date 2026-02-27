@@ -64,162 +64,45 @@ button{
   cursor:pointer;
 }
 
-.table-wrap{
-  overflow:auto;
-  max-height:calc(100vh - 60px);
-}
-
-table{
-  border-collapse:collapse;
-  width:max-content;
-  background:#fff;
-}
-
-body.dark table{
-  background:#262822;
-}
-
-th,td{
-  border:2px solid var(--stone);
+.reset-wrap{
+  padding:14px;
   text-align:center;
-  height:52px;
-  font-size:18px;
 }
 
-th:not(.label), td:not(.label){
-  width:6.5ch;
-  min-width:6.5ch;
+.reset-wrap button{
+  border-color:#666;
+  color:var(--text);
+  background:#ddd;
 }
 
-th.label, td.label{
-  width:1%;
-  white-space:nowrap;
-  background:var(--label);
-  text-align:left;
-  padding:0 12px;
-  font-weight:700;
-  position:sticky;
-  left:0;
-  z-index:3;
-}
+/* table etc (unchanged) */
+.table-wrap{overflow:auto;max-height:calc(100vh - 60px);}
+table{border-collapse:collapse;width:max-content;background:#fff;}
+body.dark table{background:#262822;}
+th,td{border:2px solid var(--stone);text-align:center;height:52px;font-size:18px;}
+th:not(.label),td:not(.label){width:6.5ch;min-width:6.5ch;}
+th.label,td.label{width:1%;white-space:nowrap;background:var(--label);text-align:left;padding:0 12px;font-weight:700;position:sticky;left:0;z-index:3;}
+thead th{background:var(--header);position:sticky;top:0;z-index:4;}
+thead th.label{z-index:5;background:var(--label);}
+input.score{width:100%;height:100%;border:none;background:transparent;text-align:center;font-size:20px;font-weight:600;padding:0;color:inherit;}
+input.name{width:100%;border:none;background:transparent;text-align:center;font-size:14px;font-weight:700;padding:0;color:inherit;}
+input:focus{outline:none;background:#fffdf7;}
+body.dark input:focus{background:#33362f;}
+td.total{background:var(--total);font-size:20px;font-weight:900;}
 
-thead th{
-  background:var(--header);
-  position:sticky;
-  top:0;
-  z-index:4;
-}
+@keyframes sheepBounce{0%{transform:scale(1);}40%{transform:scale(1.25);}100%{transform:scale(1);}}
+.sheep-bounce{animation:sheepBounce .35s ease;}
 
-thead th.label{
-  z-index:5;
-  background:var(--label);
-}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#2f3b2a;color:#fff;padding:10px 18px;border-radius:999px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s ease;z-index:999;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-input.score{
-  width:100%;
-  height:100%;
-  border:none;
-  background:transparent;
-  text-align:center;
-  font-size:20px;
-  font-weight:600;
-  padding:0;
-  color:inherit;
-}
+.history{padding:10px 14px;font-size:14px;background:#faf8f2;border-top:2px solid var(--stone);}
+body.dark .history{background:#22241f;}
 
-input.name{
-  width:100%;
-  border:none;
-  background:transparent;
-  text-align:center;
-  font-size:14px;
-  font-weight:700;
-  padding:0;
-  color:inherit;
-}
-
-input:focus{
-  outline:none;
-  background:#fffdf7;
-}
-
-body.dark input:focus{
-  background:#33362f;
-}
-
-td.total{
-  background:var(--total);
-  font-size:20px;
-  font-weight:900;
-}
-
-/* 🐑 sheep bounce */
-@keyframes sheepBounce{
-  0%{transform:scale(1);}
-  40%{transform:scale(1.25);}
-  100%{transform:scale(1);}
-}
-.sheep-bounce{
-  animation:sheepBounce 0.35s ease;
-}
-
-/* 🎉 toast */
-.toast{
-  position:fixed;
-  bottom:24px;
-  left:50%;
-  transform:translateX(-50%) translateY(20px);
-  background:#2f3b2a;
-  color:#fff;
-  padding:10px 18px;
-  border-radius:999px;
-  font-weight:700;
-  opacity:0;
-  pointer-events:none;
-  transition:all .25s ease;
-  z-index:999;
-}
-.toast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
-
-/* History blocks */
-.history{
-  padding:10px 14px;
-  font-size:14px;
-  background:#faf8f2;
-  border-top:2px solid var(--stone);
-}
-
-body.dark .history{
-  background:#22241f;
-}
-
-.round-block{
-  margin:8px 0;
-  padding:6px 10px;
-  background:#fff;
-  border:1px solid #cfc6b8;
-  border-radius:6px;
-  font-size:13px;
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-}
-
-body.dark .round-block{
-  background:#2a2d27;
-}
-
-.round-left{
-  flex:1;
-}
-
-.round-date{
-  opacity:.7;
-  white-space:nowrap;
-}
+.round-block{margin:8px 0;padding:6px 10px;background:#fff;border:1px solid #cfc6b8;border-radius:6px;font-size:13px;display:flex;justify-content:space-between;gap:12px;}
+body.dark .round-block{background:#2a2d27;}
+.round-left{flex:1;}
+.round-date{opacity:.7;white-space:nowrap;}
 </style>
 </head>
 
@@ -230,244 +113,199 @@ body.dark .round-block{
   <div class="header-buttons">
     <button id="darkToggle">🌙</button>
     <button id="addRound">Add Round</button>
-    <button id="reset">Reset All</button>
   </div>
 </header>
 
 <div class="table-wrap">
 <table id="scoreTable">
-  <thead>
-    <tr>
-      <th class="label" style="text-align:center;">
-        <span id="sheepIcon" style="font-size:24px; display:block;">🐑</span>
-      </th>
-      <th><input class="name" placeholder="P1"></th>
-      <th><input class="name" placeholder="P2"></th>
-      <th><input class="name" placeholder="P3"></th>
-      <th><input class="name" placeholder="P4"></th>
-      <th><input class="name" placeholder="P5"></th>
-    </tr>
-  </thead>
-  <tbody></tbody>
+<thead>
+<tr>
+<th class="label" style="text-align:center;"><span id="sheepIcon" style="font-size:24px;display:block;">🐑</span></th>
+<th><input class="name" placeholder="P1"></th>
+<th><input class="name" placeholder="P2"></th>
+<th><input class="name" placeholder="P3"></th>
+<th><input class="name" placeholder="P4"></th>
+<th><input class="name" placeholder="P5"></th>
+</tr>
+</thead>
+<tbody></tbody>
 </table>
 </div>
 
 <div class="history">
-  <strong>Round History</strong>
-  <div id="historyTable"></div>
+<strong>Round History</strong>
+<div id="historyTable"></div>
+</div>
+
+<div class="reset-wrap">
+<button id="reset">Reset All</button>
 </div>
 
 <div id="toast" class="toast">Round recorded! 🐑</div>
 
 <script>
-const STORAGE_KEY = "dartmoor-scorepad-v4";
-const DARK_KEY = "dartmoor-darkmode";
-const players = 5;
-const tbody = document.querySelector("#scoreTable tbody");
-const sheepIcon = document.getElementById("sheepIcon");
-const toast = document.getElementById("toast");
+const STORAGE_KEY="dartmoor-scorepad-v5";
+const DARK_KEY="dartmoor-darkmode";
+const players=5;
+const tbody=document.querySelector("#scoreTable tbody");
+const sheepIcon=document.getElementById("sheepIcon");
+const toast=document.getElementById("toast");
 
-/* ---------- dark mode ---------- */
+/* dark mode */
 function applyDarkMode(on){
-  document.body.classList.toggle("dark", on);
-  document.getElementById("darkToggle").textContent = on ? "☀️" : "🌙";
-  localStorage.setItem(DARK_KEY, on ? "1" : "0");
+document.body.classList.toggle("dark",on);
+document.getElementById("darkToggle").textContent=on?"☀️":"🌙";
+localStorage.setItem(DARK_KEY,on?"1":"0");
 }
-
-(function initDark(){
-  const saved = localStorage.getItem(DARK_KEY);
-  if(saved !== null){
-    applyDarkMode(saved === "1");
-  } else {
-    applyDarkMode(window.matchMedia("(prefers-color-scheme: dark)").matches);
-  }
+(function(){
+const saved=localStorage.getItem(DARK_KEY);
+if(saved!==null)applyDarkMode(saved==="1");
+else applyDarkMode(window.matchMedia("(prefers-color-scheme: dark)").matches);
 })();
+document.getElementById("darkToggle").onclick=()=>applyDarkMode(!document.body.classList.contains("dark"));
 
-document.getElementById("darkToggle").onclick = () => {
-  applyDarkMode(!document.body.classList.contains("dark"));
-};
+function numOrZero(v){const n=Number(v);return Number.isFinite(n)?n:0;}
+function getPlayerNames(){return [...document.querySelectorAll("input.name")].map((el,i)=>el.value.trim()||`P${i+1}`);}
+function showToast(){toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1400);}
 
-/* ---------- helpers ---------- */
-function numOrZero(v){
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function getPlayerNames(){
-  return [...document.querySelectorAll("input.name")]
-    .map((el,i)=> el.value.trim() || `P${i+1}`);
-}
-
-function showToast(){
-  toast.classList.add("show");
-  setTimeout(()=> toast.classList.remove("show"), 1400);
-}
-
-/* ---------- rows ---------- */
-const rows = [
-  { key:"trees",  label:"Trees" },
-  { key:"moors",  label:"Moors" },
-  { key:"top",    label:"Top" },
-  { key:"bottom", label:"Bottom" },
-  { key:"sides",  label:"Left / Right" },
-  { key:"cave",   label:"Cave" },
-  { key:"total",  label:"Σ Total", total:true }
+const rows=[
+{key:"trees",label:"Trees"},
+{key:"moors",label:"Moors"},
+{key:"top",label:"Top"},
+{key:"bottom",label:"Bottom"},
+{key:"sides",label:"Left / Right"},
+{key:"cave",label:"Cave"},
+{key:"total",label:"Σ Total",total:true}
 ];
 
-const inputsByPlayer = Array.from({length: players}, () => []);
-const totalCells = [];
-let history = [];
+const inputsByPlayer=Array.from({length:players},()=>[]);
+const totalCells=[];
+let history=[];
 
-/* build table */
+/* build */
 rows.forEach(row=>{
-  const tr = document.createElement("tr");
+const tr=document.createElement("tr");
+const label=document.createElement("td");
+label.className="label";
+label.textContent=row.label;
+tr.appendChild(label);
 
-  const label = document.createElement("td");
-  label.className = "label";
-  label.textContent = row.label;
-  tr.appendChild(label);
-
-  for(let p=0; p<players; p++){
-    const td = document.createElement("td");
-
-    if(row.total){
-      td.className = "total";
-      td.textContent = "";
-      totalCells[p] = td;
-    } else {
-      const input = document.createElement("input");
-      input.type = "number";
-      input.inputMode = "numeric";
-      input.className = "score";
-      input.value = "";
-      input.addEventListener("input", updateTotals);
-      td.appendChild(input);
-      inputsByPlayer[p].push(input);
-    }
-
-    tr.appendChild(td);
-  }
-
-  tbody.appendChild(tr);
+for(let p=0;p<players;p++){
+const td=document.createElement("td");
+if(row.total){
+td.className="total";
+td.textContent="";
+totalCells[p]=td;
+}else{
+const input=document.createElement("input");
+input.type="number";
+input.inputMode="numeric";
+input.className="score";
+input.value="";
+input.addEventListener("input",updateTotals);
+td.appendChild(input);
+inputsByPlayer[p].push(input);
+}
+tr.appendChild(td);
+}
+tbody.appendChild(tr);
 });
 
 /* totals */
 function updateTotals(){
-  for(let p=0; p<players; p++){
-    let sum = 0;
-    let hasValue = false;
-
-    for(const inp of inputsByPlayer[p]){
-      if(inp.value !== "") hasValue = true;
-      sum += numOrZero(inp.value);
-    }
-
-    totalCells[p].textContent =
-      (!hasValue && sum === 0) ? "" : String(sum);
-  }
-
-  sheepIcon.classList.remove("sheep-bounce");
-  void sheepIcon.offsetWidth;
-  sheepIcon.classList.add("sheep-bounce");
-
-  saveState();
+for(let p=0;p<players;p++){
+let sum=0,hasValue=false;
+for(const inp of inputsByPlayer[p]){
+if(inp.value!=="")hasValue=true;
+sum+=numOrZero(inp.value);
+}
+totalCells[p].textContent=(!hasValue&&sum===0)?"":String(sum);
+}
+sheepIcon.classList.remove("sheep-bounce");
+void sheepIcon.offsetWidth;
+sheepIcon.classList.add("sheep-bounce");
+saveState();
 }
 
 /* add round */
 function addRound(){
-  const totals = totalCells.map(td => td.textContent || "0");
-
-  history.push({
-    totals,
-    date: new Date().toLocaleString()
-  });
-
-  inputsByPlayer.forEach(arr => arr.forEach(i => i.value = ""));
-
-  renderHistory();
-  updateTotals();
-  saveState();
-  showToast();
-
-  inputsByPlayer[0][0]?.focus();
+const totals=totalCells.map(td=>td.textContent||"0");
+history.push({totals,date:new Date().toLocaleString()});
+inputsByPlayer.forEach(arr=>arr.forEach(i=>i.value=""));
+renderHistory();
+updateTotals();
+saveState();
+showToast();
+inputsByPlayer[0][0]?.focus();
 }
 
-/* history render (sorted high → low) */
+/* history render — FILTER ZERO SCORES */
 function renderHistory(){
-  const container = document.getElementById("historyTable");
+const container=document.getElementById("historyTable");
+if(!history.length){
+container.innerHTML="<em>No rounds recorded.</em>";
+return;
+}
+const names=getPlayerNames();
 
-  if(!history.length){
-    container.innerHTML = "<em>No rounds recorded.</em>";
-    return;
-  }
+container.innerHTML=history.map((round,i)=>{
+let paired=round.totals.map((v,p)=>({
+name:names[p],
+score:Number(v)||0
+}))
+.filter(x=>x.score!==0)           /* ⭐ NEW FILTER */
+.sort((a,b)=>b.score-a.score);
 
-  const names = getPlayerNames();
+if(!paired.length) paired=[{name:"(all zero)",score:0}];
 
-  container.innerHTML = history.map((round,i)=>{
-    const paired = round.totals.map((v,p)=>({
-      name:names[p],
-      score:Number(v)||0
-    }));
-
-    paired.sort((a,b)=> b.score - a.score);
-
-    const parts = paired.map(x=> `${x.name}: ${x.score}`);
-
-    return `
-      <div class="round-block">
-        <div class="round-left">
-          <strong>Round ${i+1}</strong> ${parts.join(" • ")}
-        </div>
-        <div class="round-date">${round.date}</div>
-      </div>
-    `;
-  }).join("");
+const parts=paired.map(x=>`${x.name}: ${x.score}`);
+return `<div class="round-block">
+<div class="round-left"><strong>Round ${i+1}</strong> ${parts.join(" • ")}</div>
+<div class="round-date">${round.date}</div>
+</div>`;
+}).join("");
 }
 
 /* storage */
 function saveState(){
-  const data = {
-    scores: inputsByPlayer.map(arr=>arr.map(i=>i.value)),
-    names: getPlayerNames(),
-    history
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+const data={
+scores:inputsByPlayer.map(arr=>arr.map(i=>i.value)),
+names:getPlayerNames(),
+history
+};
+localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
 }
 
 function loadState(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return;
-  try{
-    const data = JSON.parse(raw);
-
-    data.scores?.forEach((playerArr,p)=>{
-      playerArr.forEach((val,i)=>{
-        if(inputsByPlayer[p][i]) inputsByPlayer[p][i].value = val;
-      });
-    });
-
-    data.names?.forEach((val,i)=>{
-      const el = document.querySelectorAll("input.name")[i];
-      if(el) el.value = val;
-    });
-
-    history = data.history || [];
-  }catch{}
+const raw=localStorage.getItem(STORAGE_KEY);
+if(!raw)return;
+try{
+const data=JSON.parse(raw);
+data.scores?.forEach((playerArr,p)=>{
+playerArr.forEach((val,i)=>{
+if(inputsByPlayer[p][i])inputsByPlayer[p][i].value=val;
+});
+});
+data.names?.forEach((val,i)=>{
+const el=document.querySelectorAll("input.name")[i];
+if(el)el.value=val;
+});
+history=data.history||[];
+}catch{}
 }
 
 /* reset */
-document.getElementById("reset").onclick = () => {
-  if(!confirm("Reset all scores and history?")) return;
-
-  document.querySelectorAll("input.score").forEach(i => i.value = "");
-  document.querySelectorAll("input.name").forEach(i => i.value = "");
-  history = [];
-  renderHistory();
-  updateTotals();
-  saveState();
+document.getElementById("reset").onclick=()=>{
+if(!confirm("Reset all scores and history?"))return;
+document.querySelectorAll("input.score").forEach(i=>i.value="");
+document.querySelectorAll("input.name").forEach(i=>i.value="";
+history=[];
+renderHistory();
+updateTotals();
+saveState();
 };
 
-document.getElementById("addRound").onclick = addRound;
+document.getElementById("addRound").onclick=addRound;
 
 /* init */
 loadState();
