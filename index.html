@@ -13,12 +13,27 @@
   --label:#dde4d3;
   --header:#f7f5ef;
   --total:#ece8df;
+  --bg:#f4f1ea;
+  --text:#000;
+}
+
+/* 🌙 DARK MODE */
+body.dark{
+  --moor:#2e3a2a;
+  --parchment:#1e1f1c;
+  --stone:#5a5f55;
+  --label:#2f332d;
+  --header:#2a2e28;
+  --total:#2c302a;
+  --bg:#1e1f1c;
+  --text:#e8e6df;
 }
 
 body{
   margin:0;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
-  background:var(--parchment);
+  background:var(--bg);
+  color:var(--text);
 }
 
 header{
@@ -58,6 +73,10 @@ table{
   border-collapse:collapse;
   width:max-content;
   background:#fff;
+}
+
+body.dark table{
+  background:#262822;
 }
 
 th,td{
@@ -105,6 +124,7 @@ input.score{
   font-size:20px;
   font-weight:600;
   padding:0;
+  color:inherit;
 }
 
 input.name{
@@ -115,11 +135,16 @@ input.name{
   font-size:14px;
   font-weight:700;
   padding:0;
+  color:inherit;
 }
 
 input:focus{
   outline:none;
   background:#fffdf7;
+}
+
+body.dark input:focus{
+  background:#33362f;
 }
 
 td.total{
@@ -167,6 +192,10 @@ td.total{
   border-top:2px solid var(--stone);
 }
 
+body.dark .history{
+  background:#22241f;
+}
+
 .round-block{
   margin:8px 0;
   padding:6px 10px;
@@ -174,9 +203,22 @@ td.total{
   border:1px solid #cfc6b8;
   border-radius:6px;
   font-size:13px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
 }
-.round-block strong{
-  margin-right:8px;
+
+body.dark .round-block{
+  background:#2a2d27;
+}
+
+.round-left{
+  flex:1;
+}
+
+.round-date{
+  opacity:.7;
+  white-space:nowrap;
 }
 </style>
 </head>
@@ -186,6 +228,7 @@ td.total{
 <header>
   <div>Dartmoor — Score Sheet</div>
   <div class="header-buttons">
+    <button id="darkToggle">🌙</button>
     <button id="addRound">Add Round</button>
     <button id="reset">Reset All</button>
   </div>
@@ -217,17 +260,50 @@ td.total{
 <div id="toast" class="toast">Round recorded! 🐑</div>
 
 <script>
-const STORAGE_KEY = "dartmoor-scorepad-v3";
+const STORAGE_KEY = "dartmoor-scorepad-v4";
+const DARK_KEY = "dartmoor-darkmode";
 const players = 5;
 const tbody = document.querySelector("#scoreTable tbody");
 const sheepIcon = document.getElementById("sheepIcon");
 const toast = document.getElementById("toast");
 
+/* ---------- dark mode ---------- */
+function applyDarkMode(on){
+  document.body.classList.toggle("dark", on);
+  document.getElementById("darkToggle").textContent = on ? "☀️" : "🌙";
+  localStorage.setItem(DARK_KEY, on ? "1" : "0");
+}
+
+(function initDark(){
+  const saved = localStorage.getItem(DARK_KEY);
+  if(saved !== null){
+    applyDarkMode(saved === "1");
+  } else {
+    applyDarkMode(window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }
+})();
+
+document.getElementById("darkToggle").onclick = () => {
+  applyDarkMode(!document.body.classList.contains("dark"));
+};
+
+/* ---------- helpers ---------- */
 function numOrZero(v){
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 }
 
+function getPlayerNames(){
+  return [...document.querySelectorAll("input.name")]
+    .map((el,i)=> el.value.trim() || `P${i+1}`);
+}
+
+function showToast(){
+  toast.classList.add("show");
+  setTimeout(()=> toast.classList.remove("show"), 1400);
+}
+
+/* ---------- rows ---------- */
 const rows = [
   { key:"trees",  label:"Trees" },
   { key:"moors",  label:"Moors" },
@@ -297,23 +373,15 @@ function updateTotals(){
   saveState();
 }
 
-/* helpers */
-function getPlayerNames(){
-  return [...document.querySelectorAll("input.name")]
-    .map((el,i)=> el.value.trim() || `P${i+1}`);
-}
-
-function showToast(){
-  toast.classList.add("show");
-  setTimeout(()=> toast.classList.remove("show"), 1400);
-}
-
 /* add round */
 function addRound(){
   const totals = totalCells.map(td => td.textContent || "0");
-  history.push({ totals });
 
-  // clear scores
+  history.push({
+    totals,
+    date: new Date().toLocaleString()
+  });
+
   inputsByPlayer.forEach(arr => arr.forEach(i => i.value = ""));
 
   renderHistory();
@@ -321,11 +389,10 @@ function addRound(){
   saveState();
   showToast();
 
-  // focus first cell
   inputsByPlayer[0][0]?.focus();
 }
 
-/* history render */
+/* history render (sorted high → low) */
 function renderHistory(){
   const container = document.getElementById("historyTable");
 
@@ -337,8 +404,23 @@ function renderHistory(){
   const names = getPlayerNames();
 
   container.innerHTML = history.map((round,i)=>{
-    const parts = round.totals.map((v,p)=> `${names[p]}: ${v}`);
-    return `<div class="round-block"><strong>Round ${i+1}</strong>${parts.join(" • ")}</div>`;
+    const paired = round.totals.map((v,p)=>({
+      name:names[p],
+      score:Number(v)||0
+    }));
+
+    paired.sort((a,b)=> b.score - a.score);
+
+    const parts = paired.map(x=> `${x.name}: ${x.score}`);
+
+    return `
+      <div class="round-block">
+        <div class="round-left">
+          <strong>Round ${i+1}</strong> ${parts.join(" • ")}
+        </div>
+        <div class="round-date">${round.date}</div>
+      </div>
+    `;
   }).join("");
 }
 
