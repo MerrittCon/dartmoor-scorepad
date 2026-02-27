@@ -60,11 +60,6 @@ button{
   cursor:pointer;
 }
 
-.main{
-  padding:0;
-}
-
-/* Keep table scrollable on small screens */
 .table-wrap{
   overflow:auto;
   max-height:calc(100vh - 60px);
@@ -185,7 +180,7 @@ td.total{
   transform:translateX(-50%) translateY(0);
 }
 
-/* History blocks */
+/* History */
 .history{
   padding:10px 14px;
   font-size:14px;
@@ -243,46 +238,42 @@ body.dark .round-block{
 <header>
   <div>Dartmoor — Score Sheet</div>
   <div class="header-buttons">
-    <button id="darkToggle" title="Toggle dark mode">🌙</button>
+    <button id="darkToggle">🌙</button>
     <button id="addRound">Add Round</button>
   </div>
 </header>
 
-<div class="main">
+<div class="table-wrap">
+<table id="scoreTable">
+<thead>
+<tr>
+<th class="label" style="text-align:center;">
+<span id="sheepIcon" style="font-size:24px; display:block;">🐑</span>
+</th>
+<th><input class="name" placeholder="P1"></th>
+<th><input class="name" placeholder="P2"></th>
+<th><input class="name" placeholder="P3"></th>
+<th><input class="name" placeholder="P4"></th>
+<th><input class="name" placeholder="P5"></th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
 
-  <div class="table-wrap">
-    <table id="scoreTable">
-      <thead>
-        <tr>
-          <th class="label" style="text-align:center;">
-            <span id="sheepIcon" style="font-size:24px; display:block;">🐑</span>
-          </th>
-          <th><input class="name" placeholder="P1"></th>
-          <th><input class="name" placeholder="P2"></th>
-          <th><input class="name" placeholder="P3"></th>
-          <th><input class="name" placeholder="P4"></th>
-          <th><input class="name" placeholder="P5"></th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<div class="history">
+<strong>Round History</strong>
+<div id="historyTable"></div>
+</div>
 
-  <div class="history">
-    <strong>Round History</strong>
-    <div id="historyTable"></div>
-  </div>
-
-  <div class="reset-wrap">
-    <button id="reset">Reset All</button>
-  </div>
-
+<div class="reset-wrap">
+<button id="reset">Reset All</button>
 </div>
 
 <div id="toast" class="toast">Round recorded! 🐑</div>
 
 <script>
-const STORAGE_KEY = "dartmoor-scorepad-v6";
+const STORAGE_KEY = "dartmoor-scorepad-v7";
 const DARK_KEY = "dartmoor-darkmode";
 const players = 5;
 
@@ -337,7 +328,7 @@ const rows = [
 
 const inputsByPlayer = Array.from({length: players}, () => []);
 const totalCells = [];
-let history = []; // each: { totals:[...], date:"..." }
+let history = [];
 
 /* ---------- build table ---------- */
 rows.forEach(row=>{
@@ -360,7 +351,7 @@ rows.forEach(row=>{
       input.type = "number";
       input.inputMode = "numeric";
       input.className = "score";
-      input.value = ""; // blank by default
+      input.value = "";
       input.addEventListener("input", updateTotals);
       td.appendChild(input);
       inputsByPlayer[p].push(input);
@@ -396,12 +387,14 @@ function updateTotals(){
 /* ---------- history ---------- */
 function addRound(){
   const totals = totalCells.map(td => td.textContent || "0");
+  const namesSnapshot = getPlayerNames();
+
   history.push({
     totals,
+    names: namesSnapshot,
     date: new Date().toLocaleString()
   });
 
-  // clear scores for next round
   inputsByPlayer.forEach(arr => arr.forEach(inp => inp.value = ""));
 
   renderHistory();
@@ -409,7 +402,6 @@ function addRound(){
   saveState();
   showToast();
 
-  // focus first score cell
   inputsByPlayer[0][0]?.focus();
 }
 
@@ -421,17 +413,12 @@ function renderHistory(){
     return;
   }
 
-  const names = getPlayerNames();
-
   container.innerHTML = history.map((round,i)=>{
-    // pair current names with stored totals
     let paired = round.totals.map((v,p)=> ({
-      name: names[p],
+      name: (round.names && round.names[p]) || `P${p+1}`,
       score: Number(v) || 0
     }))
-    // omit zeros
     .filter(x => x.score !== 0)
-    // sort high -> low
     .sort((a,b)=> b.score - a.score);
 
     const left = paired.length
@@ -476,18 +463,8 @@ function loadState(){
     });
 
     history = data.history || [];
-  }catch{
-    // ignore
-  }
+  }catch{}
 }
-
-/* live name updates should re-render history + save */
-document.querySelectorAll("input.name").forEach(inp=>{
-  inp.addEventListener("input", ()=>{
-    renderHistory();
-    saveState();
-  });
-});
 
 /* ---------- reset ---------- */
 function resetAll(){
